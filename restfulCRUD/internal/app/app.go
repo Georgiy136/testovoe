@@ -23,10 +23,10 @@ func Run(cfg *config.Config) {
 	migrateUp(pg)
 
 	// Repo
-	projectRepository := repository.NewProject(pg)
+	repository := repository.NewRepository(pg)
 
 	// Use case
-	projectUseCases := usecase.NewUsecases(projectRepository)
+	projectUseCases := usecase.NewUsecases(repository)
 
 	// HTTP Server
 	router := gin.Default()

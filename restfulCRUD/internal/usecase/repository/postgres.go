@@ -41,16 +41,18 @@ func (db *Repository) GetAllCoinsName(ctx context.Context) ([]string, error) {
 }
 
 func (db *Repository) AddCoin(ctx context.Context, coinName string) error {
-	_, err := db.Bun.NewInsert().Model(&p).Exec(ctx)
+	dataIns := models.CoinsDB{
+		CoinName: coinName,
+	}
+
+	_, err := db.Bun.NewInsert().On("CONFLICT (coin_name) DO NOTHING").Model(&dataIns).Exec(ctx)
 	if err != nil {
-		log.Println(err)
-		return fmt.Errorf("Project - CreateProject - db.Bun.NewInsert: %w", err)
+		return fmt.Errorf("Repository - AddCoin - db.Bun.NewInsert: %w", err)
 	}
 	return nil
 }
 
 func (db *Repository) GetOneProject(ctx context.Context, id uuid.UUID) (*models.Project, error) {
-
 	project := models.Project{}
 	var operatorsId []string
 
