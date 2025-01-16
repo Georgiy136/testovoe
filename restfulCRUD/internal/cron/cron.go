@@ -36,14 +36,21 @@ func (c *Cron) Configure() {
 
 func (c *Cron) Work() {
 	for {
-		errMsg := strings.Builder{}
-		wg := &sync.WaitGroup{}
+		var (
+			maxGoroutines = 100
+			sem           = make(chan struct{}, maxGoroutines)
+			errMsg        = strings.Builder{}
+			wg            = &sync.WaitGroup{}
+		)
 		// получаем названия койнов из памяти
 		for coin := range c.cache.GetListCoins() {
 			wg.Add(1)
 			// выполняем запрос http и получаем актуальную инфо-ию
 			go func(coin string) {
 				defer wg.Done()
+				sem <- struct{}{}
+				defer func() { <-sem }()
+
 				res, err := c.binanceApiClient.GetCoin(coin)
 				if err != nil {
 					errMsg.WriteString(fmt.Sprintf("[ERROR] Get coin %s error: %s\n", coin, err.Error()))
@@ -58,6 +65,6 @@ func (c *Cron) Work() {
 		if errMsg.Len() > 0 {
 			log.Println(errMsg.String())
 		}
-		time.Sleep(time.Second * c.secondsInterval)
+		time.Sleep(time.Second * time.Duration(c.secondsInterval))
 	}
 }
