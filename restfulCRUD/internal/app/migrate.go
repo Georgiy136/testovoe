@@ -3,24 +3,24 @@ package app
 import (
 	"errors"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
+	postgres "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/rs/zerolog/log"
 	"github.com/uptrace/bun"
 )
 
 func migrateUp(conn *bun.DB) {
-	// Накатываем миграции
-	driver, err := database.Open(conn.String())
+
+	instance, err := postgres.WithInstance(conn.DB, &postgres.Config{})
 	if err != nil {
-		log.Fatal().Err(err).Msg("не удалось инициализировать систему миграций Postgres")
+		log.Fatal().Err(err).Msg("dStub.WithInstance ошибка при применении миграций Postgres")
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrations",
 		"postgres",
-		driver,
+		instance,
 	)
-
 	if err != nil {
 		log.Fatal().Err(err).Msg("не удалось инициализировать систему миграций Postgres")
 	}
