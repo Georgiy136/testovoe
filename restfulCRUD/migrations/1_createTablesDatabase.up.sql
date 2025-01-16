@@ -15,7 +15,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_currency_watch_list_coin_id_ch_dt
 CREATE TABLE IF NOT EXISTS currency.coins (
     ID SERIAL PRIMARY KEY,
     coin_name CHAR(3) NOT NULL,
-    is_deleted BOOLEAN DEFAULT FALSE
+    is_actual BOOLEAN DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_currency_coins_coin_name
