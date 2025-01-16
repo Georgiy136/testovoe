@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 	"myapp/config"
 	"myapp/internal/app"
 )
@@ -21,7 +21,7 @@ func main() {
 	// Configuration
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatalf("Config error: %s", err)
+		log.Fatal().Err(err).Msgf("Config error: %s:", err)
 	}
 	// Run
 	app.Run(cfg)

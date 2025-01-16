@@ -19,13 +19,11 @@ func NewRouter(router *gin.Engine, ps usecase.ProjectUseCases) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Routers
-	project := router.Group("/project")
+	project := router.Group("/currency")
 	{
-		project.POST("/", projectHandlers.PostProject)
-		project.GET("/", projectHandlers.GetAllProjects)
-		project.GET("/:id", projectHandlers.GetOneProject)
-		project.PUT("/:id", projectHandlers.UpdateProject)
-		project.DELETE("/:id", projectHandlers.DeleteProject)
+		project.POST("/add", projectHandlers.PostProject)
+		project.GET("/price", projectHandlers.GetOneProject)
+		project.DELETE("/remove", projectHandlers.DeleteProject)
 
 	}
 }
