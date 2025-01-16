@@ -10,7 +10,6 @@ import (
 )
 
 func migrateUp(conn *bun.DB) {
-
 	instance, err := postgres.WithInstance(conn.DB, &postgres.Config{})
 	if err != nil {
 		log.Fatal().Err(err).Msg("dStub.WithInstance ошибка при применении миграций Postgres")

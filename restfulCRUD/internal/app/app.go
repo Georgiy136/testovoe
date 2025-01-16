@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/rs/zerolog/log"
 	"myapp/config"
 	"myapp/internal/handler"
 	"myapp/internal/usecase"
@@ -15,7 +15,7 @@ func Run(cfg *config.Config) {
 	// Repository
 	pg, err := postgres.New(cfg.Postgres)
 	if err != nil {
-		log.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
+		log.Fatal().Err(err).Msgf("app - Run - postgres.New: %v", err)
 	}
 	defer pg.Close()
 
