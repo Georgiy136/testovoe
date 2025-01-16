@@ -6,9 +6,9 @@ import (
 	"myapp/internal/models"
 )
 
-type ProjectStrore interface {
+type CoinStrore interface {
 	CreateProject(ctx context.Context, p models.Project) error
-	GetAllProjects(ctx context.Context) ([]models.Project, error)
+	GetAllCoinsName(ctx context.Context) ([]models.CoinsDB, error)
 	DeleteProject(ctx context.Context, id uuid.UUID) error
 	UpdateProject(ctx context.Context, id uuid.UUID, p models.Project) (*models.Project, error)
 	GetOneProject(ctx context.Context, id uuid.UUID) (*models.Project, error)

@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
-type ProjectHandler struct {
-	us usecase.ProjectUseCases
+type Handler struct {
+	us usecase.UseCases
 }
 
 // PostProject godoc
@@ -27,7 +27,7 @@ type ProjectHandler struct {
 //	@Param			input	body		models.Project	true	"Project info"
 //	@Success		201		{object}	models.Project
 //	@Router			/project [post]
-func (h *ProjectHandler) PostProject(c *gin.Context) {
+func (h *Handler) PostProject(c *gin.Context) {
 
 	type PostProjectRequest struct {
 		Id          uuid.UUID `json:"project_id"`
@@ -68,7 +68,7 @@ func (h *ProjectHandler) PostProject(c *gin.Context) {
 //	@Param			id	path		string	true	"Project ID"
 //	@Success		202	{object}	models.Project
 //	@Router			/project/{id} [get]
-func (h *ProjectHandler) GetOneProject(c *gin.Context) {
+func (h *Handler) GetOneProject(c *gin.Context) {
 	id := c.Param("id")
 	projects, err := h.us.GetOneProject(c.Request.Context(), id)
 	if err != nil {
@@ -90,7 +90,7 @@ func (h *ProjectHandler) GetOneProject(c *gin.Context) {
 //	@Produce		json
 //	@Success		202	{array}	[]models.Project
 //	@Router			/project [get]
-func (h *ProjectHandler) GetAllProjects(c *gin.Context) {
+func (h *Handler) GetAllProjects(c *gin.Context) {
 	projects, err := h.us.GetAllProjects(c.Request.Context())
 	if err != nil {
 		log.Println(err)
@@ -112,7 +112,7 @@ func (h *ProjectHandler) GetAllProjects(c *gin.Context) {
 //	@Param			id	path	string	true	"Project ID"
 //	@Success		200
 //	@Router			/project/{id} [delete]
-func (h *ProjectHandler) DeleteProject(c *gin.Context) {
+func (h *Handler) DeleteProject(c *gin.Context) {
 	id := c.Param("id")
 	err := h.us.DeleteProject(c.Request.Context(), id)
 	if err != nil {
@@ -135,7 +135,7 @@ func (h *ProjectHandler) DeleteProject(c *gin.Context) {
 //	@Param			input	body		models.Project	true	"Project info"
 //	@Success		201		{object}	models.Project
 //	@Router			/project/{id} [put]
-func (h *ProjectHandler) UpdateProject(c *gin.Context) {
+func (h *Handler) UpdateProject(c *gin.Context) {
 
 	id := c.Param("id")
 
@@ -158,7 +158,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		ProjectType: PostProject.ProjectType,
 	}
 
-	p, err := h.us.UpdateProject(c.Request.Context(), id, *project)
+	p, err := h.us.Project(c.Request.Context(), id, *project)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -179,7 +179,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 //	@Param			operator_id	path		string	true	"Operator ID"
 //	@Success		201			{object}	models.Project
 //	@Router			/AddOperatorToProject/{project_id}/{operator_id} [put]
-func (h *ProjectHandler) AddOperatorToProject(c *gin.Context) {
+func (h *Handler) AddOperatorToProject(c *gin.Context) {
 	project_id := c.Param("project_id")
 	operator_id := c.Param("operator_id")
 	p, err := h.us.AddOperatorToProject(c.Request.Context(), project_id, operator_id)
@@ -204,7 +204,7 @@ func (h *ProjectHandler) AddOperatorToProject(c *gin.Context) {
 //	@Param			operator_id	path		string	true	"Operator ID"
 //	@Success		201			{object}	models.Project
 //	@Router			/DelOperatorFromProject/{project_id}/{operator_id} [put]
-func (h *ProjectHandler) DeleteOperatorFromProject(c *gin.Context) {
+func (h *Handler) DeleteOperatorFromProject(c *gin.Context) {
 	project_id := c.Param("project_id")
 	operator_id := c.Param("operator_id")
 	p, err := h.us.DeleteOperatorFromProject(c.Request.Context(), project_id, operator_id)

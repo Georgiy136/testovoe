@@ -12,18 +12,35 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func NewProject(Bun *bun.DB) *Project {
-	return &Project{
+func NewRepository(Bun *bun.DB) *Repository {
+	return &Repository{
 		Bun: Bun,
 	}
 }
 
-type Project struct {
+type Repository struct {
 	Bun *bun.DB
 }
 
-// Проекты
-func (db *Project) CreateProject(ctx context.Context, p models.Project) error {
+func (db *Repository) GetAllCoinsName(ctx context.Context) ([]string, error) {
+	data := []models.CoinsDB{}
+
+	err := db.Bun.NewSelect().Model(&data).Where(`deleted_at IS NULL`).Scan(ctx)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return []string{}, nil
+		}
+		return nil, fmt.Errorf("[GetAllCoins] Select error: %w", err)
+	}
+	res := make([]string, len(data))
+	for i := range data {
+		res[i] = data[i].CoinName
+	}
+
+	return res, nil
+}
+
+func (db *Repository) AddCoin(ctx context.Context, coinName string) error {
 	_, err := db.Bun.NewInsert().Model(&p).Exec(ctx)
 	if err != nil {
 		log.Println(err)
@@ -32,35 +49,7 @@ func (db *Project) CreateProject(ctx context.Context, p models.Project) error {
 	return nil
 }
 
-func (db *Project) GetAllProjects(ctx context.Context) ([]models.Project, error) {
-
-	projects := []models.Project{}
-	project := models.Project{}
-	var operatorsId []string
-
-	rows, err := db.Bun.NewSelect().
-		Table("projects").
-		Column("uuid", "project_name", "project_types.project_type", "operators").
-		Join("join project_types").
-		JoinOn("projects.project_type = project_types.id").
-		Rows(ctx)
-
-	if err != nil {
-		log.Println(err)
-		return nil, fmt.Errorf("Project - GetAllProjects - db.Bun.NewSelect: %w", err)
-	}
-	for rows.Next() {
-		err = rows.Scan(&project.Id, &project.ProjectName, &project.ProjectType, (pq.Array)(&operatorsId))
-		if err != nil {
-			return nil, fmt.Errorf("Project - GetAllProjects - rows.Scan: %w", err)
-		}
-	}
-	defer rows.Close()
-
-	return projects, nil
-}
-
-func (db *Project) GetOneProject(ctx context.Context, id uuid.UUID) (*models.Project, error) {
+func (db *Repository) GetOneProject(ctx context.Context, id uuid.UUID) (*models.Project, error) {
 
 	project := models.Project{}
 	var operatorsId []string
@@ -84,7 +73,7 @@ func (db *Project) GetOneProject(ctx context.Context, id uuid.UUID) (*models.Pro
 	return &project, nil
 }
 
-func (db *Project) UpdateProject(ctx context.Context, id uuid.UUID, project models.Project) (*models.Project, error) {
+func (db *Repository) UpdateProject(ctx context.Context, id uuid.UUID, project models.Project) (*models.Project, error) {
 
 	var operatorsId []string
 
@@ -105,7 +94,7 @@ func (db *Project) UpdateProject(ctx context.Context, id uuid.UUID, project mode
 	return &project, nil
 }
 
-func (db *Project) DeleteProject(ctx context.Context, id uuid.UUID) error {
+func (db *Repository) DeleteProject(ctx context.Context, id uuid.UUID) error {
 
 	project := &models.Project{}
 	err := db.Bun.NewDelete().
@@ -124,7 +113,7 @@ func (db *Project) DeleteProject(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (db *Project) AddOperatorToProject(ctx context.Context, projectId uuid.UUID, operatorId uuid.UUID) (*models.Project, error) {
+func (db *Repository) AddOperatorToProject(ctx context.Context, projectId uuid.UUID, operatorId uuid.UUID) (*models.Project, error) {
 
 	var operatorsId []string
 
@@ -149,7 +138,7 @@ func (db *Project) AddOperatorToProject(ctx context.Context, projectId uuid.UUID
 	return project, nil
 }
 
-func (db *Project) DeleteOperatorFromProject(ctx context.Context, projectId uuid.UUID, operatorId uuid.UUID) (*models.Project, error) {
+func (db *Repository) DeleteOperatorFromProject(ctx context.Context, projectId uuid.UUID, operatorId uuid.UUID) (*models.Project, error) {
 
 	var operatorsId []string
 

@@ -26,7 +26,7 @@ func Run(cfg *config.Config) {
 	projectRepository := repository.NewProject(pg)
 
 	// Use case
-	projectUseCases := usecase.NewProjectUsecases(projectRepository)
+	projectUseCases := usecase.NewUsecases(projectRepository)
 
 	// HTTP Server
 	router := gin.Default()

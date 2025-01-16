@@ -1,8 +1,9 @@
 package cron
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"github.com/rs/zerolog/log"
 	"myapp/clients"
 	"myapp/internal/usecase/repository"
 	"myapp/pkg/cache"
@@ -11,7 +12,7 @@ import (
 	"time"
 )
 
-func NewCron(binanceApiClient clients.BinanceApiClient, repo repository.Project, cache cache.Cache, secondsInterval int) *Cron {
+func NewCron(binanceApiClient clients.BinanceApiClient, repo repository.Repository, cache cache.Cache, secondsInterval int) *Cron {
 	return &Cron{
 		binanceApiClient: binanceApiClient,
 		secondsInterval:  secondsInterval,
@@ -24,14 +25,18 @@ type Cron struct {
 	binanceApiClient clients.BinanceApiClient
 	secondsInterval  int
 	cache            cache.Cache
-	repo             repository.Project
+	repo             repository.Repository
 }
 
-func (c *Cron) Configure() {
-	// получить основные койны из БД
-
+func (c *Cron) Configure() error {
+	// получить список актуальных койнов из БД
+	coins, err := c.repo.GetAllCoinsName(context.Background())
+	if err != nil {
+		return fmt.Errorf("[Configure] GetAllCoins error: %w", err)
+	}
 	// установливаем в кэш
-
+	c.cache.AddCoins(coins)
+	return nil
 }
 
 func (c *Cron) Work() {
@@ -63,7 +68,7 @@ func (c *Cron) Work() {
 		wg.Wait()
 
 		if errMsg.Len() > 0 {
-			log.Println(errMsg.String())
+			log.Error().Msg(errMsg.String())
 		}
 		time.Sleep(time.Second * time.Duration(c.secondsInterval))
 	}
